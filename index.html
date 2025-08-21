@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字符串与十六进制转换工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .converter-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .converter-section:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+
+        .option label {
+            margin: 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 20px auto;
+            min-width: 200px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(76, 175, 80, 0.1);
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            min-height: 60px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.1);
+            border-color: #f44336;
+            color: #d32f2f;
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .options {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 字符串与十六进制转换工具</h1>
+        
+        <!-- 字符串转十六进制 -->
+        <div class="converter-section">
+            <h2 class="section-title">📝 字符串转十六进制</h2>
+            
+            <div class="input-group">
+                <label for="stringInput">输入字符串：</label>
+                <textarea id="stringInput" rows="4" placeholder="请输入要转换的字符串..."></textarea>
+            </div>
+            
+            <div class="options">
+                <div class="option">
+                    <input type="checkbox" id="addPrefix" checked>
+                    <label for="addPrefix">添加 0x 前缀</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="addSpacing" checked>
+                    <label for="addSpacing">使用空格分隔</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="upperCase">
+                    <label for="upperCase">使用大写字母</label>
+                </div>
+            </div>
+            
+            <button class="btn" onclick="stringToHex()">🔄 转换为十六进制</button>
+            
+            <div id="hexResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 十六进制转字符串 -->
+        <div class="converter-section">
+            <h2 class="section-title">🔢 十六进制转字符串</h2>
+            
+            <div class="input-group">
+                <label for="hexInput">输入十六进制：</label>
+                <textarea id="hexInput" rows="4" placeholder="请输入十六进制数据（支持 0x 前缀和空格分隔）..."></textarea>
+            </div>
+            
+            <button class="btn" onclick="hexToString()">🔄 转换为字符串</button>
+            
+            <div id="stringResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // 字符串转十六进制
+        function stringToHex() {
+            const input = document.getElementById('stringInput').value;
+            const addPrefix = document.getElementById('addPrefix').checked;
+            const addSpacing = document.getElementById('addSpacing').checked;
+            const upperCase = document.getElementById('upperCase').checked;
+            const resultDiv = document.getElementById('hexResult');
+            
+            if (!input) {
+                showResult(resultDiv, '请输入要转换的字符串', 'error');
+                return;
+            }
+            
+            try {
+                const hexArray = [];
+                
+                // 将字符串转换为UTF-8字节序列
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(input);
+                
+                // 将每个字节转换为十六进制
+                for (let byte of bytes) {
+                    let hex = byte.toString(16);
+                    
+                    // 确保是两位数
+                    if (hex.length === 1) {
+                        hex = '0' + hex;
+                    }
+                    
+                    // 处理大小写
+                    if (upperCase) {
+                        hex = hex.toUpperCase();
+                    }
+                    
+                    hexArray.push(hex);
+                }
+                
+                // 连接结果
+                const separator = addSpacing ? ' ' : '';
+                let result = hexArray.join(separator);
+                
+                // 添加前缀到整个结果前面
+                if (addPrefix) {
+                    result = '0x' + result;
+                }
+                
+                showResult(resultDiv, result, 'success');
+                
+            } catch (error) {
+                showResult(resultDiv, '转换失败：' + error.message, 'error');
+            }
+        }
+        
+        // 十六进制转字符串
+        function hexToString() {
+            let input = document.getElementById('hexInput').value.trim();
+            const resultDiv = document.getElementById('stringResult');
+            
+            if (!input) {
+                showResult(resultDiv, '请输入十六进制数据', 'error');
+                return;
+            }
+            
+            try {
+                // 清理输入：移除0x前缀和多余空格
+                input = input.replace(/0x/gi, '');
+                input = input.replace(/\s+/g, ' ');
+                
+                // 分割十六进制字符串
+                const hexParts = input.split(' ');
+                
+                // 确保每个部分都是有效的十六进制
+                for (let i = 0; i < hexParts.length; i++) {
+                    let part = hexParts[i];
+                    if (part.length === 1) {
+                        hexParts[i] = '0' + part;
+                    }
+                }
+                
+                // 重新组合
+                const cleanHex = hexParts.join('');
+                
+                // 验证十六进制格式
+                if (!/^[0-9a-fA-F]*$/.test(cleanHex)) {
+                    throw new Error('无效的十六进制格式');
+                }
+                
+                // 确保是偶数长度
+                if (cleanHex.length % 2 !== 0) {
+                    throw new Error('十六进制字符串长度必须是偶数');
+                }
+                
+                // 转换为字节数组
+                const bytes = [];
+                for (let i = 0; i < cleanHex.length; i += 2) {
+                    const hexByte = cleanHex.substr(i, 2);
+                    bytes.push(parseInt(hexByte, 16));
+                }
+                
+                // 使用TextDecoder解码UTF-8
+                const decoder = new TextDecoder('utf-8');
+                const uint8Array = new Uint8Array(bytes);
+                const result = decoder.decode(uint8Array);
+                
+                showResult(resultDiv, result, 'success');
+                
+            } catch (error) {
+                showResult(resultDiv, '转换失败：' + error.message, 'error');
+            }
+        }
+        
+        // 显示结果
+        function showResult(element, text, type) {
+            element.style.display = 'block';
+            element.textContent = text;
+            element.className = 'result ' + type;
+            
+            // 添加动画效果
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(10px)';
+            
+            setTimeout(() => {
+                element.style.transition = 'all 0.3s ease';
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, 10);
+        }
+        
+        // 添加回车键快捷转换
+        document.getElementById('stringInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                stringToHex();
+            }
+        });
+        
+        document.getElementById('hexInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                hexToString();
+            }
+        });
+        
+        // 示例数据
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('stringInput').value = 'Hello, 世界! 🌍';
+            document.getElementById('hexInput').value = '48 65 6c 6c 6f 2c 20 e4 b8 96 e7 95 8c 21 20 f0 9f 8c 8d';
+        });
+    </script>
+</body>
+</html>
